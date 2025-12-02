@@ -52,3 +52,5 @@ Preencha os Campos: Insira a Companhia Aérea, os códigos IATA de Origem e Dest
 Consulte: Clique no botão "Consultar Previsão".
 
 Resultado: O resultado será exibido abaixo do formulário, indicando o Status Estimado (NO HORÁRIO ou ATRASO PROVÁVEL) e a Probabilidade calculada pelo modelo do backend.
+
+![voo2](https://github.com/user-attachments/assets/16392a83-2691-4894-b081-7143fa0d2acf)
