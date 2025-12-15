@@ -3,144 +3,163 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Previsor de Atraso de Voo</title>
+    <title>FlightOnTime - Previsão de Atraso de Voo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        /* Estilo customizado simples */
         body {
             background-color: #f8f9fa;
         }
         .container {
-            max-width: 600px;
+            max-width: 700px;
             margin-top: 50px;
+            margin-bottom: 50px;
         }
-        .card-prediction {
-            margin-top: 30px;
-        }
-        .result-status {
-            font-weight: bold;
-            font-size: 1.5rem;
+        .header-title {
+            color: #0d6efd;
+            font-weight: 300;
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1 class="text-center mb-4 text-primary">✈️ Previsão de Atraso de Voo</h1>
-        <p class="text-center text-muted">Insira os dados do voo para estimar a probabilidade de atraso.</p>
-        
-        <div class="card p-4 shadow-sm">
-            <form id="predictionForm">
-                
-                <div class="mb-3">
-                    <label for="airline" class="form-label">Companhia Aérea</label>
-                    <select class="form-select" id="airline" required>
-                        <option value="">Selecione a Cia.</option>
-                        <option value="AZUL">Azul</option>
-                        <option value="GOL">GOL</option>
-                        <option value="LATAM">LATAM</option>
-                        <option value="VOEPASS">Voepass</option>
-                    </select>
-                </div>
+    <div class="container bg-white p-4 rounded shadow-lg">
+        <h2 class="text-center header-title mb-4">✈️ FlightOnTime: Previsão de Pontualidade</h2>
+        <p class="text-center text-muted">Consulte a probabilidade de atraso do seu voo com base nos dados logísticos.</p>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="origin" class="form-label">Origem (Código IATA)</label>
-                        <input type="text" class="form-control" id="origin" placeholder="Ex: GRU" required maxlength="3">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="destination" class="form-label">Destino (Código IATA)</label>
-                        <input type="text" class="form-control" id="destination" placeholder="Ex: SDU" required maxlength="3">
-                    </div>
+        <form id="predictionForm">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="airline" class="form-label">Companhia Aérea (IATA)</label>
+                    <input type="text" class="form-control" id="airline" placeholder="Ex: GOL, AZU, LAT" maxlength="3" required>
                 </div>
-
-                <div class="mb-4">
-                    <label for="scheduledHour" class="form-label">Horário Previsto (0 a 23h)</label>
-                    <input type="number" class="form-control" id="scheduledHour" min="0" max="23" placeholder="Ex: 14" required>
+                <div class="col-md-6 mb-3">
+                    <label for="distancia_km" class="form-label">Distância em KM</label>
+                    <input type="number" class="form-control" id="distancia_km" placeholder="Ex: 350" required min="10">
                 </div>
-                
-                <button type="submit" class="btn btn-primary w-100">Consultar Previsão</button>
-            </form>
-        </div>
+            </div>
 
-        <div class="card card-prediction p-4 shadow-lg d-none" id="resultCard">
-            <h5 class="card-title text-center">Resultado da Previsão</h5>
-            <hr>
-            <div class="text-center">
-                <p>Status Estimado:</p>
-                <p id="resultStatus" class="result-status text-success">...</p>
-                <p id="resultProbability" class="text-muted small">Probabilidade: 0%</p>
-                <p id="resultMessage" class="small"></p>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="origin" class="form-label">Aeroporto de Origem (IATA)</label>
+                    <input type="text" class="form-control" id="origin" placeholder="Ex: GRU" maxlength="3" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="destination" class="form-label">Aeroporto de Destino (IATA)</label>
+                    <input type="text" class="form-control" id="destination" placeholder="Ex: CGH" maxlength="3" required>
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label for="data_partida" class="form-label">Data e Hora de Partida</label>
+                <input type="datetime-local" class="form-control" id="data_partida" required>
+            </div>
+            
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    Consultar Previsão
+                </button>
+            </div>
+        </form>
+
+        <div id="resultCard" class="card mt-5 d-none">
+            <div class="card-header bg-light">
+                Resultado da Análise de Risco
+            </div>
+            <div class="card-body text-center">
+                <h3 class="card-title mb-3">Status Estimado: <span id="resultStatus" class="fw-bold"></span></h3>
+                <p class="card-text lead">
+                    <span id="resultProbability">Probabilidade: --%</span>
+                </p>
+                <p class="text-muted small" id="resultMessage">Previsão calculada com base em análise de risco de ML.</p>
             </div>
         </div>
         
-         <div class="alert alert-danger mt-3 d-none" id="errorAlert" role="alert">
-            Não foi possível conectar-se ao servidor (API). Certifique-se de que o backend está rodando.
+        <div id="errorAlert" class="alert alert-danger mt-4 d-none" role="alert">
+            
         </div>
 
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-       // A porta padrão do Spring Boot é 8080
-const API_URL = 'http://localhost:8080/api/v1/predict';
+        // O Backend Java está na porta 8080
+        const API_URL = 'http://localhost:8080/predict'; 
 
-document.getElementById('predictionForm').addEventListener('submit', function(event) {
-    event.preventDefault(); // Impede o envio padrão do formulário
+        document.getElementById('predictionForm').addEventListener('submit', function(event) {
+            event.preventDefault();
 
-    // 1. Coletar dados do formulário
-    const requestData = {
-        airline: document.getElementById('airline').value.toUpperCase(),
-        origin: document.getElementById('origin').value.toUpperCase(),
-        destination: document.getElementById('destination').value.toUpperCase(),
-        scheduledHour: parseInt(document.getElementById('scheduledHour').value)
-    };
+            // Esconder resultados e alertas anteriores
+            document.getElementById('resultCard').classList.add('d-none');
+            document.getElementById('errorAlert').classList.add('d-none');
+            document.getElementById('errorAlert').textContent = '';
 
-    // Esconder resultados/erros anteriores
-    document.getElementById('resultCard').classList.add('d-none');
-    document.getElementById('errorAlert').classList.add('d-none');
+            // 1. Coletar e formatar dados do formulário
+            
+            // O input datetime-local fornece: YYYY-MM-DDTHH:MM
+            const rawDateTime = document.getElementById('data_partida').value;
+            // Para o formato ISO 8601 completo (YYY-MM-DDTHH:MM:SS), adicionamos :00 no final
+            const formattedDateTime = rawDateTime + ':00'; 
 
-    // 2. Fazer a requisição POST para a API (Backend Java)
-    fetch(API_URL, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestData)
-    })
-    .then(response => {
-        // Tratar erros de HTTP (ex: 404, 500)
-        if (!response.ok) {
-            throw new Error(`Erro HTTP: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        // 3. Exibir o resultado
-        const resultStatusElement = document.getElementById('resultStatus');
-        
-        document.getElementById('resultProbability').textContent = `Probabilidade: ${data.probability}`;
-        document.getElementById('resultMessage').textContent = data.message;
-        
-        resultStatusElement.textContent = data.status;
-        
-        // Mudar a cor do status baseado no resultado
-        if (data.status.includes('ATRASO')) {
-            resultStatusElement.classList.remove('text-success');
-            resultStatusElement.classList.add('text-danger');
-        } else {
-            resultStatusElement.classList.remove('text-danger');
-            resultStatusElement.classList.add('text-success');
-        }
+            const requestData = {
+                // Os nomes das chaves DEVEM corresponder ao FlightRequest.java / Python
+                "companhia": document.getElementById('airline').value.toUpperCase(),
+                "origem": document.getElementById('origin').value.toUpperCase(),
+                "destino": document.getElementById('destination').value.toUpperCase(),
+                "data_partida": formattedDateTime,
+                "distancia_km": parseInt(document.getElementById('distancia_km').value)
+            };
+            
+            // 2. Fazer a requisição POST para a API (Backend Java)
+            fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                // 2.1. Tratar Status HTTP de Erro (4xx e 5xx)
+                if (!response.ok) {
+                    // Tenta ler o corpo JSON do erro
+                    return response.json().then(err => { 
+                        // Exemplo: se o erro for do Java (ex: validação), ele terá um campo 'previsao'
+                        throw new Error(err.previsao || `Erro HTTP: ${response.status}`); 
+                    }).catch(() => {
+                        // Se não for JSON (ex: erro de conexão do servidor), lança um erro genérico
+                        throw new Error(`Erro de Servidor Inesperado: ${response.status}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                // 3. Exibir o resultado
+                const resultStatusElement = document.getElementById('resultStatus');
+                const probDecimal = data.probabilidade;
 
-        document.getElementById('resultCard').classList.remove('d-none');
-    })
-    .catch(error => {
-        // 4. Exibir erro de conexão
-        console.error('Erro na requisição:', error);
-        document.getElementById('errorAlert').classList.remove('d-none');
-    });
-});
-</script>
+                // Formata a probabilidade de decimal (0.78) para percentual (78.00%)
+                document.getElementById('resultProbability').textContent = `Probabilidade: ${(probDecimal * 100).toFixed(2)}%`;
+                
+                // data.previsao é a string "Pontual" ou "Atrasado" vinda do Python
+                const status = data.previsao.toUpperCase();
+                resultStatusElement.textContent = status; 
+                
+                // Mudar a cor do status baseado no resultado
+                resultStatusElement.classList.remove('text-success', 'text-danger');
+                if (status === 'ATRASADO') {
+                    resultStatusElement.classList.add('text-danger');
+                } else {
+                    resultStatusElement.classList.add('text-success');
+                }
+
+                document.getElementById('resultCard').classList.remove('d-none');
+            })
+            .catch(error => {
+                // Trata erros (rede, validação, servidor)
+                console.error('Erro na requisição:', error);
+                document.getElementById('errorAlert').textContent = `Falha: ${error.message}. Verifique se a porta 8080 (Java) e 5000 (Python) estão ativas.`;
+                document.getElementById('errorAlert').classList.remove('d-none');
+            });
+        });
+    </script>
+
 </body>
 </html>
